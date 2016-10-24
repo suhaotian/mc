@@ -11,19 +11,19 @@ function asyncComponent(getComponent) {
   return class AsyncComponent extends React.Component {
     constructor(props) {
       super(props);
-      this.state = { Component: null };
+      this.state = { component: null };
     }
 
     componentWillMount() {
-      if (!this.state.Component) {
-        getComponent(Component => {
-          this.setState({ Component: Component.default })
+      if (!this.state.component) {
+        getComponent(component => {
+          this.setState({ component: component.default })
         })
       }
     }
 
     render() {
-      const Component = this.state.Component
+      const Component = this.state.component
       if (Component) {
         return <Component {...this.props} />
       }
