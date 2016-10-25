@@ -9,12 +9,9 @@ import Link from 'react-router/Link'
 
 function asyncComponent(getComponent) {
   return class AsyncComponent extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = { component: null };
-    }
+    state = { component: null }
 
-    componentWillMount() {
+    componentDidMount() {
       if (!this.state.component) {
         getComponent(component => {
           this.setState({ component: component.default })
