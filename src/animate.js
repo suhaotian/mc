@@ -47,10 +47,18 @@ styles.hsl  = {
   fontSize: '30px',
 }
 
-const NavLink = (props) => (
-  <li style={styles.navItem}>
-    <Link 
-      {...props} 
+let CurrentDicrection = 'forward'
+let DirectionCacheIndex = -1
+const NavLink = ({index, ...other}) => (
+  <li style={styles.navItem} onClick={() => {
+    // CurrentDicrection = index
+    CurrentDicrection = DirectionCacheIndex > index ? 'back' : 'forward'
+    console.log(index, DirectionCacheIndex)
+    DirectionCacheIndex = index
+    console.log('b:' + CurrentDicrection)
+  }}>
+    <Link
+      {...other}
       style={{ color: 'inherit' }}
       activeStyle={{ color: 'red', textDecoration: 'none' }}
     />
@@ -67,10 +75,13 @@ const HSL = ({ params }) => (
 const AnimationExample = () => (
   <div style={styles.fill}>
     <ul style={styles.nav}>
-      <NavLink to="/10/50/50">Red</NavLink>
-      <NavLink to="/50/70/50">Yellow</NavLink>
-      <NavLink to="/200/50/50">Blue</NavLink>
-      <NavLink to="/300/50/50">Dunno</NavLink>
+      {
+        [{to: '/10/50/50', text: 'Red'}, {to: '/50/70/50', text: 'Yellow'}, {to: '/200/50/50', text: 'Blue'}, {to: '/300/50/50', text: 'Dunno'}].map(({to, text}, i) => {
+          return (
+            <NavLink to={to} key={i} index={i}>{text}</NavLink>
+          )
+        })
+      }
     </ul>
 
     <div style={styles.content}>
@@ -84,8 +95,9 @@ const AnimationExample = () => (
 )
 
 const MatchWithFade = ({ component:Component, ...rest }) => {
-  const willLeave = () => ({ opacity: spring(-60, {stiffness: 210, damping: 20}) })
-  const willEnter = () => ({ opacity: 100 })
+  const willLeave = () => ({ opacity: spring(CurrentDicrection == 'back' ? 60 : -60, {stiffness: 210, damping: 20}) })
+  const willEnter = () => ({ opacity: CurrentDicrection == 'back' ? -100 : 100 })
+  console.log(CurrentDicrection)
   return (
     <Match {...rest} children={({ matched, ...props }) => {
       let key = props.location.pathname + Date.now()
@@ -93,7 +105,7 @@ const MatchWithFade = ({ component:Component, ...rest }) => {
         willLeave={willLeave}
         willEnter={willEnter}
         styles={
-          matched ? 
+          matched ?
           [{
             key: key,
             style: { opacity: spring(0, {stiffness: 160, damping: 24}),  },
@@ -107,8 +119,8 @@ const MatchWithFade = ({ component:Component, ...rest }) => {
               return (
                 <div
                   key={config.key}
-                  style={{ 
-                    ...styles.fill, 
+                  style={{
+                    ...styles.fill,
                     WebkitTransform: `translateX(${config.style.opacity}%)`,
                   }}
                 >
